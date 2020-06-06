@@ -1,0 +1,3 @@
+/cs/usr/doronbruder/CLionProjects/os_ex4/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/cs/usr/doronbruder/CLionProjects/os_ex4/cmake-build-debug/CMakeFiles/os_ex4.dir
+/cs/usr/doronbruder/CLionProjects/os_ex4/cmake-build-debug/CMakeFiles/edit_cache.dir
