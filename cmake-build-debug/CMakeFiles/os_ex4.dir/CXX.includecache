@@ -12,35 +12,19 @@ climits
 stdint.h
 -
 
-/cs/usr/doronbruder/CLionProjects/os_ex4/PhysicalMemory.cpp
-PhysicalMemory.h
-/cs/usr/doronbruder/CLionProjects/os_ex4/PhysicalMemory.h
-vector
--
-unordered_map
--
-cassert
--
-cstdio
--
-
 /cs/usr/doronbruder/CLionProjects/os_ex4/PhysicalMemory.h
 MemoryConstants.h
 /cs/usr/doronbruder/CLionProjects/os_ex4/MemoryConstants.h
-
-/cs/usr/doronbruder/CLionProjects/os_ex4/SimpleTest.cpp
-VirtualMemory.h
-/cs/usr/doronbruder/CLionProjects/os_ex4/VirtualMemory.h
-cstdio
--
-cassert
--
 
 /cs/usr/doronbruder/CLionProjects/os_ex4/VirtualMemory.cpp
 VirtualMemory.h
 /cs/usr/doronbruder/CLionProjects/os_ex4/VirtualMemory.h
 PhysicalMemory.h
 /cs/usr/doronbruder/CLionProjects/os_ex4/PhysicalMemory.h
+string
+-
+array
+-
 
 /cs/usr/doronbruder/CLionProjects/os_ex4/VirtualMemory.h
 MemoryConstants.h
