@@ -25,6 +25,10 @@ string
 -
 array
 -
+vector
+-
+stack
+-
 
 /cs/usr/doronbruder/CLionProjects/os_ex4/VirtualMemory.h
 MemoryConstants.h
