@@ -20,7 +20,7 @@ typedef struct{
 }Victim;
 
 void DFSUtill(uint64_t curFrame,uint64_t offset, int depth,Path myPath,uint64_t pageNum,word_t*
-maxFrame){
+maxFrame,word_t * emptyFrame,Victim* victim){
     word_t curAdd =0;
     PMread(curFrame*PAGE_SIZE+offset, &curAdd);
 
@@ -37,16 +37,18 @@ maxFrame){
     printf("%d\n",curAdd);
     for (int i = 0; i < PAGE_SIZE; ++i)
     {
-        DFSUtill(curAdd,i,depth+1,myPath,pageNum,maxFrame);
+        DFSUtill(curAdd,i,depth+1,myPath,pageNum,maxFrame,emptyFrame,NULL);
     }
 
 
 
 }
-void DFS(uint64_t curFrame, uint64_t fullAdd, int depth, Path myPath,word_t* maxFrame){
+void DFS(uint64_t curFrame, uint64_t fullAdd, int depth, Path myPath,word_t* maxFrame,word_t *
+emptyFrame,Victim*
+victim){
     for (int i = 0; i < PAGE_SIZE; ++i)
     {
-        DFSUtill(0, i, 1, myPath, fullAdd,maxFrame);
+        DFSUtill(0, i, 1, myPath, fullAdd,maxFrame, emptyFrame,victim);
     }
 }
 
@@ -90,7 +92,14 @@ uint64_t getDistance(uint64_t curPage, uint64_t vPage) {
 word_t getFrame(Path path, uint64_t pageIndex)
 {
     word_t maxFrame =0;
-    DFS(0,pageIndex,1,path,&maxFrame);
+    word_t emptyFrameRet = 0;
+    int maxCyclicDist=0;
+    int cyclicDistFrame=0;
+    int pageOfCyclicDistFrame=0;
+    int parentOfCyclicDistFrame=0;
+    Victim victim = Victim{&maxCyclicDist,&cyclicDistFrame,&pageOfCyclicDistFrame,
+            &parentOfCyclicDistFrame};
+    DFS(0,pageIndex,1,path,&maxFrame,&emptyFrameRet,&victim);
     if ( (maxFrame + 1 < NUM_FRAMES))
     {
         return maxFrame+1;
