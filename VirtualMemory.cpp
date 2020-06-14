@@ -19,19 +19,36 @@ typedef struct{
     int *parentOfCyclicDistFrame;
 }Victim;
 
-typedef struct{
-    word_t *emptyFrame;
-    word_t *maxFrame;
-}FirstChoice;
+void DFSUtill(uint64_t curFrame,uint64_t offset, int depth,Path myPath,uint64_t pageNum,word_t*
+maxFrame){
+    word_t curAdd =0;
+    PMread(curFrame*PAGE_SIZE+offset, &curAdd);
 
-typedef struct{
-    Path path;
-    uint64_t frameNum;
-    uint64_t offset;
-    int depth;
-    uint64_t valPage;
-}Node;
+    if(curAdd>*maxFrame)
+    {
+        *maxFrame = curAdd;
+    }
 
+    if(!curAdd || depth==TABLES_DEPTH)
+    {
+        printf("%d\n",curAdd);
+        return;
+    }
+    printf("%d\n",curAdd);
+    for (int i = 0; i < PAGE_SIZE; ++i)
+    {
+        DFSUtill(curAdd,i,depth+1,myPath,pageNum,maxFrame);
+    }
+
+
+
+}
+void DFS(uint64_t curFrame, uint64_t fullAdd, int depth, Path myPath,word_t* maxFrame){
+    for (int i = 0; i < PAGE_SIZE; ++i)
+    {
+        DFSUtill(0, i, 1, myPath, fullAdd,maxFrame);
+    }
+}
 
 
 void clearTable(uint64_t frameIndex) {
@@ -40,21 +57,20 @@ void clearTable(uint64_t frameIndex) {
     }
 }
 
-/*
- * Initialize the virtual memory
- */
+
 void VMinitialize() {
     clearTable(0);
 }
 
 
-uint64_t getOffset(uint64_t address) {
+uint64_t offset(uint64_t address) {
     return address & ((1 << OFFSET_WIDTH) - 1);
 }
 
 
-bool inPath(Path path, word_t frameId) {
-    for (int i = 0; i < TABLES_DEPTH; ++i){
+bool visitCheck(Path path, word_t frameId) {
+    for (int i:path)
+    {
         if (path[i] == frameId){
             return true;
         }
@@ -63,34 +79,24 @@ bool inPath(Path path, word_t frameId) {
 }
 
 
-uint64_t cyclic(uint64_t curPage, uint64_t vPage) {
+uint64_t getDistance(uint64_t curPage, uint64_t vPage) {
     uint64_t diff =  vPage - curPage;
     return (diff < NUM_PAGES - diff) ? (diff):(NUM_PAGES-diff);
 }
 
 
-uint64_t allZeroFrame(uint64_t frameInd) {
-    word_t w = 0;
-    bool foundFrame = true;
-    for (uint64_t offset = 0; offset < PAGE_SIZE; ++offset) {
-        PMread(frameInd*PAGE_SIZE + offset, &w);
-        if (w != 0) {
-            foundFrame = false;
-            break;
-        }
-    }
-    if (foundFrame) {
-        return frameInd;
-    }
-    return 0;
-}
+
 
 word_t getFrame(Path path, uint64_t pageIndex)
 {
+    word_t maxFrame =0;
+    DFS(0,pageIndex,1,path,&maxFrame);
+    if ( (maxFrame + 1 < NUM_FRAMES))
+    {
+        return maxFrame+1;
+    }
+    return 0;
 }
-
-
-
 
 uint64_t findAddress(uint64_t curFrame, uint64_t fullAdd, int depth, Path myPath) {
     word_t curAdd = ROOT_VAL;
@@ -122,23 +128,24 @@ int isValidAddress(uint64_t virtualAddress)
 }
 
 int VMread(uint64_t virtualAddress, word_t* value) {
-    if (!((virtualAddress >> VIRTUAL_ADDRESS_WIDTH) == 0))
+    if (!isValidAddress(virtualAddress))
     {
         return FAIL;
     }
     Path path;
     uint64_t physicalAdd = findAddress(ROOT_VAL, virtualAddress, 0, path);
-    PMread(physicalAdd*PAGE_SIZE + getOffset(virtualAddress),  value);
+    PMread(physicalAdd*PAGE_SIZE + offset(virtualAddress), value);
     return SUCCESS;
 }
 
 
 int VMwrite(uint64_t virtualAddress, word_t value) {
-    if (!((virtualAddress >> VIRTUAL_ADDRESS_WIDTH) == 0)) {
+    if (!isValidAddress(virtualAddress))
+    {
         return FAIL;
     }
     Path path;
     uint64_t p_address = findAddress(ROOT_VAL,virtualAddress,0,path);
-    PMwrite(p_address*PAGE_SIZE + getOffset(virtualAddress),value);
+    PMwrite(p_address*PAGE_SIZE + offset(virtualAddress), value);
     return SUCCESS;
 }

@@ -12,5 +12,4 @@ CMakeFiles/os_ex4.dir/SimpleTest.cpp.o: ../VirtualMemory.h
 CMakeFiles/os_ex4.dir/VirtualMemory.cpp.o: ../MemoryConstants.h
 CMakeFiles/os_ex4.dir/VirtualMemory.cpp.o: ../PhysicalMemory.h
 CMakeFiles/os_ex4.dir/VirtualMemory.cpp.o: ../VirtualMemory.cpp
-CMakeFiles/os_ex4.dir/VirtualMemory.cpp.o: ../VirtualMemory.h
 
