@@ -9,6 +9,8 @@
 #define IS_PAGE depth == TABLES_DEPTH-1
 using namespace std;
 static const int  ROOT_VAL = 0;
+
+
 typedef array<int, TABLES_DEPTH> Path;
 typedef struct{
     int *victimDist;
@@ -141,6 +143,15 @@ uint64_t getOffset(uint64_t address) {
 }
 
 
+word_t newFrame(int cyclicDistFrame, const Victim &victim)
+{
+    PMwrite(*(victim.victimParent), 0);
+    PMevict(cyclicDistFrame, *(victim.victimPage));
+    newTable(victim);
+    return *(victim.victim);
+}
+
+
 word_t getFrame(Path path, uint64_t pageIndex)
 {
     uint64_t pagePerPath = 0; // will be build during the DFS (0 left , 1 right we keep track)
@@ -150,9 +161,9 @@ word_t getFrame(Path path, uint64_t pageIndex)
     int cyclicDistFrame=0;
     int pageOfCyclicDistFrame=0;
     int parentOfCyclicDistFrame=0;
-    Victim victim = Victim{&maxCyclicDist,&cyclicDistFrame,&pageOfCyclicDistFrame,
-            &parentOfCyclicDistFrame};
-    DFS(pageIndex,path,&maxFrame,&emptyFrameRet,&victim,pagePerPath);
+    Victim victimDetails = Victim{&maxCyclicDist, &cyclicDistFrame, &pageOfCyclicDistFrame,
+                                  &parentOfCyclicDistFrame};
+    DFS(pageIndex, path, &maxFrame, &emptyFrameRet, &victimDetails, pagePerPath);
     if(emptyFrameRet != 0)
     {
         return emptyFrameRet;
@@ -161,29 +172,25 @@ word_t getFrame(Path path, uint64_t pageIndex)
     {
         return maxFrame+1;
     }
-    // Evict and update
-    PMwrite(*(victim.victimParent), 0);
-    PMevict(cyclicDistFrame, *(victim.victimPage));
-    newTable(victim);
-    return *(victim.victim);
+    return newFrame(cyclicDistFrame, victimDetails);
 }
 
 
 
-uint64_t getAddress(uint64_t curFrame, uint64_t fullAdd, int depth, Path myPath) {
+uint64_t getAddress(uint64_t curFrame, uint64_t fullAdd, int depth, Path path) {
     word_t entryVal = ROOT_VAL;
     PMread(CURR_P_ADDRESS, &entryVal);
 
     if (entryVal == ROOT_VAL)
     {
-        entryVal = getFrame(myPath, PAGE_INDEX);
+        entryVal = getFrame(path, PAGE_INDEX);
         PMwrite(CURR_P_ADDRESS, entryVal);
     }
 
     if (!(IS_PAGE))
     {
-        myPath.at(depth) = entryVal;
-        return getAddress((uint64_t) entryVal, fullAdd, depth + 1, myPath);
+        path.at(depth) = entryVal;
+        return getAddress((uint64_t) entryVal, fullAdd, depth + 1, path);
     }
 
     else
